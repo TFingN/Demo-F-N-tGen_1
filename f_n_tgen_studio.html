@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F-NétGen – Mặc chất riêng, Giữ chất Việt</title>
+  
+  <!-- Fonts: Playfair Display (Sang trọng) & Manrope (Hiện đại) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS & Phosphor Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            brand: {
+              bg: '#FAF7F2',     /* Màu be sáng trang nhã */
+              surface: '#FFFFFF',
+              primary: '#8A2724', /* Đỏ trầm / Đỏ đô */
+              secondary: '#CFA052', /* Vàng đồng */
+              text: '#2D2422',    /* Đen nhạt / Nâu sẫm */
+              muted: '#8C827A',
+              border: '#E8E1D7',
+              hover: '#F2EBE1'
+            }
+          },
+          boxShadow: {
+            'elegant': '0 10px 40px -10px rgba(138, 39, 36, 0.08)',
+            'elegant-hover': '0 20px 40px -10px rgba(138, 39, 36, 0.12)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #FAF7F2;
+      color: #2D2422;
+      -webkit-font-smoothing: antialiased;
+      /* Background texture nhẹ nhàng giả lập giấy vân họa tiết */
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23cfa052' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #E8E1D7; border-radius: 10px; }
+
+    /* Custom Range Slider cho tỷ lệ truyền thống */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]:focus { outline: none; }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      background: #E8E1D7;
+      border-radius: 10px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #8A2724;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -9px;
+      box-shadow: 0 2px 6px rgba(138, 39, 36, 0.4);
+      border: 3px solid #FFF;
+      transition: transform 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+    /* Animations */
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-container { display: none; }
+    .step-container.active {
+      display: block;
+      animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+    }
+
+    .glass-header {
+      background: rgba(250, 247, 242, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(232, 225, 215, 0.6);
+    }
+    
+    /* Hình nền đại diện trang phục (Abstract) */
+    .bg-nguthan { background: linear-gradient(135deg, #dfc698 0%, #c4a161 100%); }
+    .bg-nhatbinh { background: linear-gradient(135deg, #a7c1b5 0%, #688a78 100%); }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col relative pb-28">
+
+  <header class="glass-header sticky top-0 z-50 w-full px-4 sm:px-6 py-4 flex items-center justify-between transition-all shadow-sm">
+    <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onclick="goToStep(0)">
+      <div class="w-8 h-8 sm:w-10 sm:h-10 text-brand-primary">
+        <!-- Nét cọ N cách điệu (Logo) -->
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <path d="M50 20 L20 40 Q50 35 80 40 Z" stroke="#8A2724" stroke-width="4" stroke-linejoin="round" fill="#FAF7F2"/>
+          <path d="M35 45 C35 45, 25 80, 45 80 C55 80, 50 60, 65 50 C75 45, 80 75, 80 75" stroke="#8A2724" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <path d="M40 50 L60 85" stroke="#8A2724" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="font-serif font-bold text-xl sm:text-2xl text-brand-text tracking-wide leading-none">F-NétGen</h1>
+    </div>
+
+    <div id="header-progress" class="hidden flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-brand-border">
+      <span class="text-xs sm:text-sm font-bold text-brand-muted tracking-widest uppercase">
+        BƯỚC <span id="current-step-display" class="text-brand-primary text-base">1</span>/04
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full max-w-2xl mx-auto px-4 sm:px-5 pt-8">
+
+    <div id="step-0" class="step-container active flex flex-col items-center justify-center min-h-[70vh] text-center">
+      <div class="w-32 h-32 sm:w-48 sm:h-48 mb-8 text-brand-primary animate-pulse relative">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-lg">
+          <path d="M50 20 L20 40 Q50 35 80 40 Z" stroke="#8A2724" stroke-width="3" stroke-linejoin="round" fill="#FAF7F2"/>
+          <path d="M35 45 C35 45, 25 80, 45 80 C55 80, 50 60, 65 50 C75 45, 80 75, 80 75" stroke="#8A2724" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <path d="M40 50 L60 85" stroke="#8A2724" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <h1 class="font-serif text-5xl md:text-6xl font-bold text-brand-text mb-4 tracking-tight drop-shadow-sm">F-NétGen</h1>
+      <p class="text-lg md:text-xl text-brand-primary font-medium mb-12 italic">Mặc chất riêng - Giữ chất Việt</p>
+
+      <button onclick="goToStep(1)" class="group relative px-12 py-4 bg-brand-primary text-white font-bold rounded-full overflow-hidden shadow-elegant hover:shadow-elegant-hover hover:-translate-y-1 transition-all duration-300">
+        <span class="relative z-10 tracking-widest uppercase text-base">Bắt đầu phối</span>
+        <div class="absolute inset-0 h-full w-0 bg-white/20 transition-all duration-300 ease-out group-hover:w-full z-0"></div>
+      </button>
+    </div>
+
+    <div id="step-1" class="step-container">
+      <div class="mb-10 text-center sm:text-left border-b border-brand-border pb-6">
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-brand-text mb-3">Hôm nay bạn đi đâu?</h2>
+        <p class="text-brand-muted font-medium text-lg">Chọn một dịp, F-NétGen lo phần còn lại.</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="occasion-grid">
+        <label class="cursor-pointer group">
+          <input type="radio" name="occasion" value="Đi học" class="visually-hidden peer" onchange="checkStep1()">
+          <div class="border-2 border-brand-border rounded-2xl p-5 text-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 transition-all shadow-sm hover:shadow-md h-full flex flex-col items-center justify-center gap-3">
+            <i class="ph ph-books text-3xl text-brand-secondary peer-checked:text-brand-primary transition-colors"></i>
+            <span class="font-semibold text-brand-text">Đi học</span>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="radio" name="occasion" value="Đi chơi" class="visually-hidden peer" onchange="checkStep1()">
+          <div class="border-2 border-brand-border rounded-2xl p-5 text-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 transition-all shadow-sm hover:shadow-md h-full flex flex-col items-center justify-center gap-3">
+            <i class="ph ph-coffee text-3xl text-brand-secondary peer-checked:text-brand-primary transition-colors"></i>
+            <span class="font-semibold text-brand-text">Đi chơi</span>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="radio" name="occasion" value="Tết" class="visually-hidden peer" onchange="checkStep1()">
+          <div class="border-2 border-brand-border rounded-2xl p-5 text-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 transition-all shadow-sm hover:shadow-md h-full flex flex-col items-center justify-center gap-3">
+            <i class="ph ph-lantern text-3xl text-brand-secondary peer-checked:text-brand-primary transition-colors"></i>
+            <span class="font-semibold text-brand-text">Tết</span>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="radio" name="occasion" value="Dự sự kiện" class="visually-hidden peer" onchange="checkStep1()">
+          <div class="border-2 border-brand-border rounded-2xl p-5 text-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 transition-all shadow-sm hover:shadow-md h-full flex flex-col items-center justify-center gap-3">
+            <i class="ph ph-ticket text-3xl text-brand-secondary peer-checked:text-brand-primary transition-colors"></i>
+            <span class="font-semibold text-brand-text">Dự sự kiện</span>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="radio" name="occasion" value="Chụp ảnh" class="visually-hidden peer" onchange="checkStep1()">
+          <div class="border-2 border-brand-border rounded-2xl p-5 text-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 transition-all shadow-sm hover:shadow-md h-full flex flex-col items-center justify-center gap-3">
+            <i class="ph ph-camera text-3xl text-brand-secondary peer-checked:text-brand-primary transition-colors"></i>
+            <span class="font-semibold text-brand-text">Chụp ảnh</span>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="radio" name="occasion" value="Đi lễ hội" class="visually-hidden peer" onchange="checkStep1()">
+          <div class="border-2 border-brand-border rounded-2xl p-5 text-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 transition-all shadow-sm hover:shadow-md h-full flex flex-col items-center justify-center gap-3">
+            <i class="ph ph-confetti text-3xl text-brand-secondary peer-checked:text-brand-primary transition-colors"></i>
+            <span class="font-semibold text-brand-text">Đi lễ hội</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-brand-border p-4 z-40">
+        <div class="max-w-2xl mx-auto flex justify-end">
+          <button id="btn-next-1" onclick="goToStep(2)" disabled class="px-10 py-3.5 bg-gray-200 text-gray-400 font-bold rounded-full transition-all cursor-not-allowed uppercase tracking-wider text-sm w-full sm:w-auto">
+            TIẾP TỤC
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="step-2" class="step-container">
+      <div class="mb-8 text-center sm:text-left border-b border-brand-border pb-6">
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-brand-text mb-3">Chọn loại trang phục</h2>
+        <p class="text-brand-muted font-medium text-lg">Giữ nét Việt hay remix theo chất riêng của bạn?</p>
+      </div>
+
+      <div class="space-y-10">
+        <!-- 1. NÉT VIỆT -->
+        <div>
+          <h3 class="text-sm font-bold tracking-widest text-brand-primary uppercase mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-brand-primary/10 flex items-center justify-center">1</span>
+            NÉT VIỆT
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <label class="cursor-pointer group relative">
+              <input type="radio" name="heritage" value="Ngũ thân tay chẽn" class="visually-hidden peer" onchange="checkStep2()">
+              <div class="border-2 border-brand-border rounded-2xl p-5 bg-white peer-checked:border-brand-primary peer-checked:ring-2 peer-checked:ring-brand-primary/20 transition-all shadow-sm overflow-hidden h-48 flex flex-col justify-end relative">
+                <div class="absolute inset-0 bg-nguthan opacity-70 group-hover:opacity-90 transition-opacity"></div>
+                <div class="absolute top-4 right-4 w-6 h-6 rounded-full border-2 border-white/60 flex items-center justify-center bg-transparent peer-checked:border-white peer-checked:bg-white transition-colors z-20 shadow-sm">
+                  <i class="ph-bold ph-check text-brand-primary text-xs opacity-0 peer-checked:opacity-100"></i>
+                </div>
+                <div class="relative z-10 bg-white/95 backdrop-blur-sm p-3 rounded-xl border border-white/50 shadow-sm">
+                  <h4 class="font-serif font-bold text-lg text-brand-text mb-1 uppercase">NGŨ THÂN TAY CHẼN</h4>
+                  <p class="text-xs text-brand-primary font-semibold flex items-center gap-1 hover:underline">
+                    Xem nét đặc trưng <i class="ph-bold ph-caret-right"></i>
+                  </p>
+                </div>
+              </div>
+            </label>
+
+            <label class="cursor-pointer group relative">
+              <input type="radio" name="heritage" value="Áo Nhật Bình" class="visually-hidden peer" onchange="checkStep2()">
+              <div class="border-2 border-brand-border rounded-2xl p-5 bg-white peer-checked:border-brand-primary peer-checked:ring-2 peer-checked:ring-brand-primary/20 transition-all shadow-sm overflow-hidden h-48 flex flex-col justify-end relative">
+                <div class="absolute inset-0 bg-nhatbinh opacity-70 group-hover:opacity-90 transition-opacity"></div>
+                <div class="absolute top-4 right-4 w-6 h-6 rounded-full border-2 border-white/60 flex items-center justify-center bg-transparent peer-checked:border-white peer-checked:bg-white transition-colors z-20 shadow-sm">
+                  <i class="ph-bold ph-check text-brand-primary text-xs opacity-0 peer-checked:opacity-100"></i>
+                </div>
+                <div class="relative z-10 bg-white/95 backdrop-blur-sm p-3 rounded-xl border border-white/50 shadow-sm">
+                  <h4 class="font-serif font-bold text-lg text-brand-text mb-1 uppercase">ÁO NHẬT BÌNH</h4>
+                  <p class="text-xs text-brand-primary font-semibold flex items-center gap-1 hover:underline">
+                    Xem nét đặc trưng <i class="ph-bold ph-caret-right"></i>
+                  </p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. REMIX HIỆN ĐẠI -->
+        <div>
+          <h3 class="text-sm font-bold tracking-widest text-brand-primary uppercase mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-brand-primary/10 flex items-center justify-center">2</span>
+            REMIX HIỆN ĐẠI
+          </h3>
+          <div class="flex flex-wrap gap-3">
+            <label class="cursor-pointer">
+              <input type="checkbox" name="modern" value="Quần" class="visually-hidden peer" onchange="checkStep2()">
+              <div class="px-6 py-2.5 rounded-full border border-brand-border bg-white text-sm font-semibold peer-checked:bg-brand-text peer-checked:text-white peer-checked:border-brand-text transition-all shadow-sm">
+                Quần
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="checkbox" name="modern" value="Áo" class="visually-hidden peer" onchange="checkStep2()">
+              <div class="px-6 py-2.5 rounded-full border border-brand-border bg-white text-sm font-semibold peer-checked:bg-brand-text peer-checked:text-white peer-checked:border-brand-text transition-all shadow-sm">
+                Áo
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="checkbox" name="modern" value="Váy" class="visually-hidden peer" onchange="checkStep2()">
+              <div class="px-6 py-2.5 rounded-full border border-brand-border bg-white text-sm font-semibold peer-checked:bg-brand-text peer-checked:text-white peer-checked:border-brand-text transition-all shadow-sm">
+                Váy
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="checkbox" name="modern" value="Đầm" class="visually-hidden peer" onchange="checkStep2()">
+              <div class="px-6 py-2.5 rounded-full border border-brand-border bg-white text-sm font-semibold peer-checked:bg-brand-text peer-checked:text-white peer-checked:border-brand-text transition-all shadow-sm">
+                Đầm
+              </div>
+            </label>
+            
+            <button class="px-5 py-2.5 rounded-full border border-dashed border-brand-muted bg-white text-sm font-semibold text-brand-muted hover:bg-brand-border/50 hover:text-brand-text transition-all shadow-sm flex items-center gap-2">
+              <i class="ph-bold ph-plus"></i> Tải ảnh trang phục
+            </button>
+          </div>
+          <div class="mt-4 p-3 bg-white border border-brand-border rounded-xl shadow-sm flex items-start gap-3">
+             <div class="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
+               <span class="font-bold text-brand-primary text-xs">AI</span>
+             </div>
+             <p class="text-sm text-brand-muted mt-1.5 font-medium">
+               Tải ảnh của bạn – AI sẽ nhận diện trang phục.
+             </p>
+          </div>
+        </div>
+
+        <!-- 3. THANH TRUYỀN THỐNG -->
+        <div>
+          <h3 class="text-sm font-bold tracking-widest text-brand-primary uppercase mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-brand-primary/10 flex items-center justify-center">3</span>
+            THANH TRUYỀN THỐNG
+          </h3>
+          <div class="bg-white p-6 sm:p-8 rounded-2xl border border-brand-border shadow-sm">
+            <div class="flex justify-between items-end mb-6">
+              <label class="font-semibold text-brand-text text-lg">Bạn muốn giữ truyền thống đến mức nào?</label>
+              <span id="tradition-val-display" class="font-serif font-bold text-3xl text-brand-primary">30%</span>
+            </div>
+            
+            <div class="relative py-4">
+              <input type="range" id="tradition-slider" min="20" max="50" value="30" step="1" oninput="updateTraditionSlider(this.value)">
+            </div>
+            
+            <div class="flex justify-between text-xs font-bold text-brand-muted uppercase tracking-wider mt-2">
+              <span>20% <br/><span class="font-normal text-[10px] normal-case text-brand-text">HIỆN ĐẠI</span></span>
+              <span class="text-right">50% <br/><span class="font-normal text-[10px] normal-case text-brand-text">TRUYỀN THỐNG</span></span>
+            </div>
+
+            <div class="mt-8 pt-5 border-t border-brand-border text-sm text-brand-text">
+              <span class="font-bold text-brand-primary uppercase tracking-wider">GIỮ NÉT VIỆT</span><br>
+              <span class="text-brand-muted mt-1 inline-block">Cân bằng nét Việt và cá tính hiện đại.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-brand-border p-4 z-40">
+        <div class="max-w-2xl mx-auto flex justify-between items-center gap-3">
+          <button onclick="goToStep(1)" class="px-6 py-3.5 text-brand-text font-bold rounded-full hover:bg-brand-hover transition-all flex items-center gap-2 text-sm uppercase tracking-wider w-full sm:w-auto justify-center">
+            <i class="ph-bold ph-arrow-left"></i> QUAY LẠI
+          </button>
+          <button id="btn-next-2" onclick="goToStep(3)" disabled class="px-10 py-3.5 bg-gray-200 text-gray-400 font-bold rounded-full transition-all cursor-not-allowed uppercase tracking-wider text-sm w-full sm:w-auto">
+            TIẾP TỤC
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="step-3" class="step-container">
+      <div class="mb-8 text-center sm:text-left border-b border-brand-border pb-6">
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-brand-text mb-3">Bạn muốn hôm nay trông như thế nào?</h2>
+        <p class="text-brand-muted font-medium text-lg mb-1">Chọn phong cách để F-NétGen remix Việt phục theo chất riêng của bạn.</p>
+        <p class="text-sm font-bold text-brand-primary mt-2 bg-brand-primary/10 inline-block px-3 py-1 rounded-md">Chọn tối đa 2 phong cách</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="style-grid">
+        
+        <label class="cursor-pointer group">
+          <input type="checkbox" name="style" value="Thanh lịch" class="visually-hidden peer" onchange="checkStep3(this)">
+          <div class="border-2 border-brand-border rounded-2xl p-6 bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 peer-checked:shadow-md transition-all shadow-sm h-full relative">
+            <div class="flex items-start justify-between mb-3">
+              <h4 class="font-serif font-bold text-xl text-brand-text uppercase">THANH LỊCH</h4>
+              <div class="w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+            <p class="text-sm text-brand-muted">Tinh tế, nhẹ nhàng, sang</p>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="checkbox" name="style" value="Lịch lãm" class="visually-hidden peer" onchange="checkStep3(this)">
+          <div class="border-2 border-brand-border rounded-2xl p-6 bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 peer-checked:shadow-md transition-all shadow-sm h-full relative">
+            <div class="flex items-start justify-between mb-3">
+              <h4 class="font-serif font-bold text-xl text-brand-text uppercase">LỊCH LÃM</h4>
+              <div class="w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+            <p class="text-sm text-brand-muted">Trưởng thành, chỉn chu, mạnh mẽ</p>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="checkbox" name="style" value="Dễ thương" class="visually-hidden peer" onchange="checkStep3(this)">
+          <div class="border-2 border-brand-border rounded-2xl p-6 bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 peer-checked:shadow-md transition-all shadow-sm h-full relative">
+            <div class="flex items-start justify-between mb-3">
+              <h4 class="font-serif font-bold text-xl text-brand-text uppercase">DỄ THƯƠNG</h4>
+              <div class="w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+            <p class="text-sm text-brand-muted">Trẻ trung, mềm mại, đáng yêu</p>
+          </div>
+        </label>
+
+        <label class="cursor-pointer group">
+          <input type="checkbox" name="style" value="Cá tính" class="visually-hidden peer" onchange="checkStep3(this)">
+          <div class="border-2 border-brand-border rounded-2xl p-6 bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary/5 peer-checked:shadow-md transition-all shadow-sm h-full relative">
+            <div class="flex items-start justify-between mb-3">
+              <h4 class="font-serif font-bold text-xl text-brand-text uppercase">CÁ TÍNH</h4>
+              <div class="w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+            <p class="text-sm text-brand-muted">Nổi bật, phá cách, có chất riêng</p>
+          </div>
+        </label>
+
+      </div>
+
+      <div class="mt-8 p-4 rounded-xl bg-white border border-brand-border flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
+          <span class="font-bold text-brand-primary text-xs">AI</span>
+        </div>
+        <div class="text-sm font-medium text-brand-text">Bạn đang chọn: <span id="selected-styles-text" class="text-brand-primary font-bold">...</span></div>
+      </div>
+
+      <div class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-brand-border p-4 z-40">
+        <div class="max-w-2xl mx-auto flex justify-between items-center gap-3">
+          <button onclick="goToStep(2)" class="px-6 py-3.5 text-brand-text font-bold rounded-full hover:bg-brand-hover transition-all flex items-center gap-2 text-sm uppercase tracking-wider w-full sm:w-auto justify-center">
+            <i class="ph-bold ph-arrow-left"></i> QUAY LẠI
+          </button>
+          <button id="btn-next-3" onclick="generateAIOutfits()" disabled class="px-10 py-3.5 bg-gray-200 text-gray-400 font-bold rounded-full transition-all cursor-not-allowed uppercase tracking-wider text-sm w-full sm:w-auto">
+            REMIX
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="step-4" class="step-container">
+      
+      <!-- AI Loading Overlay -->
+      <div id="ai-loading" class="hidden flex-col items-center justify-center py-24 text-center">
+        <i class="ph-duotone ph-spinner-gap animate-spin text-6xl text-brand-primary mb-6"></i>
+        <h3 class="font-serif text-3xl font-bold text-brand-text mb-2">Đang thiết kế bản phối...</h3>
+        <p class="text-brand-muted">AI đang dệt nên 4 bản phác thảo dành riêng cho bạn</p>
+      </div>
+
+      <div id="ai-results" class="hidden">
+        <div class="mb-8 text-center sm:text-left border-b border-brand-border pb-6">
+          <h2 class="font-serif text-3xl sm:text-4xl font-bold text-brand-text mb-3">Hãy chọn thiết kế bạn thích nhất</h2>
+          <p class="text-brand-muted font-medium text-lg">AI đã tạo 4 outfit dành riêng cho bạn</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 mb-6">
+          <!-- OUTFIT 1 -->
+          <label class="cursor-pointer group">
+            <input type="radio" name="outfit" value="OUTFIT 1" class="visually-hidden peer" onchange="checkStep4()" checked>
+            <div class="border-2 border-brand-border rounded-2xl bg-white peer-checked:border-brand-primary peer-checked:ring-2 peer-checked:ring-brand-primary/30 transition-all shadow-sm overflow-hidden flex flex-col h-full relative">
+              <div class="h-44 sm:h-64 bg-[#F5EFE6] flex items-center justify-center relative overflow-hidden group-hover:bg-[#EBE2D5] transition-colors">
+                 <!-- Biểu tượng chữ N cách điệu thay cho ảnh thật -->
+                 <svg class="w-1/2 opacity-70 drop-shadow-sm" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 20 L20 40 Q50 35 80 40 Z" stroke="#8A2724" stroke-width="2" fill="none"/>
+                    <path d="M35 45 C35 45, 25 80, 45 80 C55 80, 50 60, 65 50 C75 45, 80 75, 80 75" stroke="#8A2724" stroke-width="3" stroke-linecap="round" fill="none"/>
+                 </svg>
+              </div>
+              <div class="p-4 text-center border-t border-brand-border bg-white">
+                <h4 class="font-bold text-brand-text tracking-widest text-sm">OUTFIT 1</h4>
+              </div>
+              <div class="absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors shadow-sm">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+          </label>
+
+          <!-- OUTFIT 2 -->
+          <label class="cursor-pointer group">
+            <input type="radio" name="outfit" value="OUTFIT 2" class="visually-hidden peer" onchange="checkStep4()">
+            <div class="border-2 border-brand-border rounded-2xl bg-white peer-checked:border-brand-primary peer-checked:ring-2 peer-checked:ring-brand-primary/30 transition-all shadow-sm overflow-hidden flex flex-col h-full relative">
+              <div class="h-44 sm:h-64 bg-[#EFEBE4] flex items-center justify-center relative overflow-hidden group-hover:bg-[#E2DCD3] transition-colors">
+                 <svg class="w-1/2 opacity-50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 20 L20 40 Q50 35 80 40 Z" stroke="#2D2422" stroke-width="2" fill="none"/>
+                    <path d="M35 45 C35 45, 25 80, 45 80 C55 80, 50 60, 65 50 C75 45, 80 75, 80 75" stroke="#2D2422" stroke-width="3" stroke-linecap="round" fill="none"/>
+                 </svg>
+              </div>
+              <div class="p-4 text-center border-t border-brand-border bg-white">
+                <h4 class="font-bold text-brand-text tracking-widest text-sm">OUTFIT 2</h4>
+              </div>
+              <div class="absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors shadow-sm">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+          </label>
+
+          <!-- OUTFIT 3 -->
+          <label class="cursor-pointer group">
+            <input type="radio" name="outfit" value="OUTFIT 3" class="visually-hidden peer" onchange="checkStep4()">
+            <div class="border-2 border-brand-border rounded-2xl bg-white peer-checked:border-brand-primary peer-checked:ring-2 peer-checked:ring-brand-primary/30 transition-all shadow-sm overflow-hidden flex flex-col h-full relative">
+              <div class="h-44 sm:h-64 bg-[#F9F4EE] flex items-center justify-center relative overflow-hidden group-hover:bg-[#EBE4DB] transition-colors">
+                <svg class="w-1/2 opacity-50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 20 L20 40 Q50 35 80 40 Z" stroke="#2D2422" stroke-width="2" fill="none"/>
+                    <path d="M35 45 C35 45, 25 80, 45 80 C55 80, 50 60, 65 50 C75 45, 80 75, 80 75" stroke="#2D2422" stroke-width="3" stroke-linecap="round" fill="none"/>
+                 </svg>
+              </div>
+              <div class="p-4 text-center border-t border-brand-border bg-white">
+                <h4 class="font-bold text-brand-text tracking-widest text-sm">OUTFIT 3</h4>
+              </div>
+              <div class="absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors shadow-sm">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+          </label>
+
+          <!-- OUTFIT 4 -->
+          <label class="cursor-pointer group">
+            <input type="radio" name="outfit" value="OUTFIT 4" class="visually-hidden peer" onchange="checkStep4()">
+            <div class="border-2 border-brand-border rounded-2xl bg-white peer-checked:border-brand-primary peer-checked:ring-2 peer-checked:ring-brand-primary/30 transition-all shadow-sm overflow-hidden flex flex-col h-full relative">
+              <div class="h-44 sm:h-64 bg-[#E8E1D7] flex items-center justify-center relative overflow-hidden group-hover:bg-[#DCD4C8] transition-colors">
+                 <svg class="w-1/2 opacity-50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 20 L20 40 Q50 35 80 40 Z" stroke="#2D2422" stroke-width="2" fill="none"/>
+                    <path d="M35 45 C35 45, 25 80, 45 80 C55 80, 50 60, 65 50 C75 45, 80 75, 80 75" stroke="#2D2422" stroke-width="3" stroke-linecap="round" fill="none"/>
+                 </svg>
+              </div>
+              <div class="p-4 text-center border-t border-brand-border bg-white">
+                <h4 class="font-bold text-brand-text tracking-widest text-sm">OUTFIT 4</h4>
+              </div>
+              <div class="absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-brand-border flex items-center justify-center bg-white peer-checked:border-brand-primary peer-checked:bg-brand-primary transition-colors shadow-sm">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div class="mt-8 p-4 rounded-xl bg-white border border-brand-border flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
+            <span class="font-bold text-brand-primary text-xs">AI</span>
+          </div>
+          <div class="text-sm font-medium text-brand-text">Bạn đang chọn: <span id="selected-outfit-text" class="text-brand-primary font-bold uppercase">OUTFIT 1</span></div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-brand-border p-4 z-40">
+          <div class="max-w-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <button onclick="goToStep(3)" class="w-full sm:w-auto px-6 py-3.5 bg-white border-2 border-brand-border text-brand-text font-bold rounded-full hover:bg-brand-hover transition-all text-sm uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-sm">
+              <i class="ph-bold ph-faders"></i> CHỈNH THÊM CHÚT
+            </button>
+            <button onclick="showFinalModal()" class="w-full sm:w-auto px-10 py-3.5 bg-brand-primary text-white font-bold rounded-full hover:bg-red-900 shadow-elegant transition-all text-sm uppercase tracking-wider text-center flex items-center justify-center gap-2">
+              CHỐT OUTFIT <i class="ph-bold ph-check-circle"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="success-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-brand-text/50 backdrop-blur-sm p-4 transition-opacity">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl scale-95 opacity-0 transition-all duration-300 transform border border-brand-border" id="modal-content">
+      <div class="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-6 text-green-600 border-2 border-green-100 shadow-inner">
+        <i class="ph-bold ph-check text-4xl"></i>
+      </div>
+      <h3 class="font-serif text-3xl font-bold text-brand-text mb-3">Thành Công!</h3>
+      <p class="text-brand-muted text-sm mb-8 leading-relaxed">Bạn đã chốt <span id="modal-outfit-name" class="font-bold text-brand-primary">OUTFIT 1</span>. Giao diện Lookbook chi tiết và các gợi ý phối đồ liên quan đã được thêm vào bộ sưu tập cá nhân của bạn.</p>
+      <button onclick="closeModal()" class="w-full py-4 bg-brand-primary text-white font-bold rounded-full hover:bg-red-900 shadow-elegant transition-all text-sm uppercase tracking-wider">
+        Tuyệt Vời
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      step: 0,
+      occasion: '',
+      heritage: '',
+      modern: [],
+      traditionVal: 30,
+      styles: [],
+      outfit: 'OUTFIT 1'
+    };
+
+    function goToStep(stepNum) {
+      // Ẩn tất cả bước
+      document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+      // Hiển thị bước hiện tại
+      document.getElementById('step-' + stepNum).classList.add('active');
+      state.step = stepNum;
+
+      // Xử lý header progress
+      const headerProgress = document.getElementById('header-progress');
+      if (stepNum === 0) {
+        headerProgress.classList.add('hidden');
+      } else {
+        headerProgress.classList.remove('hidden');
+        document.getElementById('current-step-display').innerText = stepNum;
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function checkStep1() {
+      const selected = document.querySelector('input[name="occasion"]:checked');
+      if (selected) {
+        state.occasion = selected.value;
+        const btn = document.getElementById('btn-next-1');
+        btn.disabled = false;
+        btn.className = 'px-10 py-3.5 bg-brand-primary text-white font-bold rounded-full shadow-elegant hover:shadow-elegant-hover transition-all uppercase tracking-wider text-sm w-full sm:w-auto hover:-translate-y-0.5';
+      }
+    }
+
+    function checkStep2() {
+      const heritageSelected = document.querySelector('input[name="heritage"]:checked');
+      if (heritageSelected) {
+        state.heritage = heritageSelected.value;
+      }
+      state.modern = Array.from(document.querySelectorAll('input[name="modern"]:checked')).map(cb => cb.value);
+
+      const btn = document.getElementById('btn-next-2');
+      if (state.heritage !== '') {
+        btn.disabled = false;
+        btn.className = 'px-10 py-3.5 bg-brand-primary text-white font-bold rounded-full shadow-elegant hover:shadow-elegant-hover transition-all uppercase tracking-wider text-sm w-full sm:w-auto hover:-translate-y-0.5';
+      }
+    }
+
+    function updateTraditionSlider(val) {
+      state.traditionVal = val;
+      document.getElementById('tradition-val-display').innerText = val + '%';
+    }
+
+    function checkStep3(checkbox) {
+      const allCheckboxes = document.querySelectorAll('input[name="style"]');
+      let checkedBoxes = Array.from(allCheckboxes).filter(cb => cb.checked);
+
+      // Ràng buộc chỉ chọn tối đa 2 phong cách
+      if (checkedBoxes.length > 2) {
+        checkbox.checked = false;
+        checkedBoxes = Array.from(allCheckboxes).filter(cb => cb.checked);
+      }
+
+      state.styles = checkedBoxes.map(cb => cb.value);
+      const textSpan = document.getElementById('selected-styles-text');
+      if (state.styles.length > 0) {
+        textSpan.innerText = state.styles.join(' + ');
+      } else {
+        textSpan.innerText = '...';
+      }
+
+      const btn = document.getElementById('btn-next-3');
+      if (state.styles.length > 0) {
+        btn.disabled = false;
+        btn.className = 'px-10 py-3.5 bg-brand-primary text-white font-bold rounded-full shadow-elegant hover:shadow-elegant-hover transition-all uppercase tracking-wider text-sm w-full sm:w-auto hover:-translate-y-0.5';
+      } else {
+        btn.disabled = true;
+        btn.className = 'px-10 py-3.5 bg-gray-200 text-gray-400 font-bold rounded-full transition-all cursor-not-allowed uppercase tracking-wider text-sm w-full sm:w-auto';
+      }
+    }
+
+    function generateAIOutfits() {
+      goToStep(4);
+      const loading = document.getElementById('ai-loading');
+      const results = document.getElementById('ai-results');
+      
+      loading.classList.remove('hidden');
+      loading.classList.add('flex');
+      results.classList.add('hidden');
+
+      // Giả lập thời gian AI xử lý 2 giây cho cảm giác chân thực
+      setTimeout(() => {
+        loading.classList.add('hidden');
+        loading.classList.remove('flex');
+        results.classList.remove('hidden');
+        results.classList.add('fade-in');
+      }, 2000);
+    }
+
+    function checkStep4() {
+      const selected = document.querySelector('input[name="outfit"]:checked');
+      if (selected) {
+        state.outfit = selected.value;
+        document.getElementById('selected-outfit-text').innerText = state.outfit;
+      }
+    }
+
+    // Modal UI cho thao tác Chốt Outfit
+    function showFinalModal() {
+      const modal = document.getElementById('success-modal');
+      const content = document.getElementById('modal-content');
+      document.getElementById('modal-outfit-name').innerText = state.outfit;
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      // Kích hoạt animation pop-up mượt mà
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('success-modal');
+      const content = document.getElementById('modal-content');
+      
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        goToStep(0); // Trở về màn hình Hero ban đầu
+      }, 300);
+    }
+  </script>
+</body>
+</html>
